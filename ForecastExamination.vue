@@ -82,7 +82,6 @@ option && myChart.setOption(option);
 
 <template>
   <div class="pageContent">
-    
     <div class="demo-date-picker">
     <div class="container">
       

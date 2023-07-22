@@ -31,6 +31,7 @@ option = {
 
 option && myChart.setOption(option);
 })
+
 </script>
 
 <template>
