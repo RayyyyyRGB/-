@@ -1,155 +1,139 @@
-<script lang="ts" setup>
-import { onMounted } from 'vue';
+<script setup>
+
+import {onMounted} from "vue";
+import {ref} from "vue";
 import * as echarts from 'echarts';
-import { ref } from 'vue'
+import {nextTick} from "vue";
+import { configProviderContextKey } from "element-plus";
 
-const value1 = ref('')
-const value2 = ref('')
-const value3 = ref('')
-const value4 = ref('')
+const currentDate = new Date();
+const year = currentDate.getFullYear() - 1 + '';
+const month = currentDate.getMonth() < 10 ? '0' + (currentDate.getMonth() + 1 + '') : currentDate.getMonth() + 1 + ''
 
-onMounted(()=>{
-    var chartDom = document.getElementById('main');
-var myChart = echarts.init(chartDom);
-var option;
 
-option = {
-  title: {
-    text: 'Stacked Line'
-  },
-  tooltip: {
-    trigger: 'axis'
-  },
-  legend: {
-    data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
-  },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true
-  },
-  toolbox: {
-    feature: {
-      saveAsImage: {}
+const SICChartErroPrediction = 'SIC日预测误差'
+const SICChartErroAdd = 'SIC误差统计'
+const SIEChartErroAnalyse = 'SIE误差分析'
+
+const selectedYear = ref('');
+const selectedMonth = ref('');
+
+selectedYear.value = year;
+selectedMonth.value = month;
+
+let myChart;
+
+const chartTitle = ref('')
+chartTitle.value = `${selectedYear.value}年${selectedMonth.value}月~${Number(selectedYear.value) + 1 + ''}年${selectedMonth.value}月 预测结果误差折线图`
+
+function updateChartTitle() {
+  chartTitle.value = `${selectedYear.value}年${selectedMonth.value}月~${Number(selectedYear.value) + 1 + ''}年${selectedMonth.value}月 预测结果误差折线图`;
+  myChart.setOption({
+    title: {
+      text: chartTitle.value,
+      left: 'center' //标题水平居中
+    },
+  });
+}
+
+onMounted(
+    ()=>{
+      nextTick(() => {
+        myChart = echarts.init(document.getElementById('SICChart'));
+        myChart.setOption({
+          title: {
+            text: chartTitle.value,
+            left: 'center' //标题水平居中
+          },
+          tooltip: {},
+          xAxis: {
+            type: 'category',
+            name: '时间',
+            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+          },
+          yAxis: {
+            type: 'value',
+          },
+          legend: { //图例
+            data: ['ours', 'persistence'],
+            orient: 'horizontal',
+            left: 'center',
+            bottom: '5',
+          },
+          series: [
+            {
+              name: 'ours',
+              type: 'line',
+              data: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            },
+            {
+              name: 'persistence',
+              type: 'line',
+              data: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+            },
+            
+          ]
+        });
+
+      })
     }
-  },
-  xAxis: {
-    type: 'category',
-    boundaryGap: false,
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
-  },
-  series: [
-    {
-      name: 'Email',
-      type: 'line',
-      stack: 'Total',
-      data: [120, 132, 101, 134, 90, 230, 210]
-    },
-    {
-      name: 'Union Ads',
-      type: 'line',
-      stack: 'Total',
-      data: [220, 182, 191, 234, 290, 330, 310]
-    },
-    {
-      name: 'Video Ads',
-      type: 'line',
-      stack: 'Total',
-      data: [150, 232, 201, 154, 190, 330, 410]
-    },
-    {
-      name: 'Direct',
-      type: 'line',
-      stack: 'Total',
-      data: [320, 332, 301, 334, 390, 330, 320]
-    },
-    {
-      name: 'Search Engine',
-      type: 'line',
-      stack: 'Total',
-      data: [820, 932, 901, 934, 1290, 1330, 1320]
-    }
-  ]
-};
+)
 
-option && myChart.setOption(option);
-})
 </script>
 
 <template>
   <div class="pageContent">
-    <div class="demo-date-picker">
-    <div class="container">
-      
-      <div class="block">
-        <span class="demonstration">Month</span>
-        <el-date-picker
-          v-model="value2"
-          type="month"
-          placeholder="Pick a month"
-        />
-      </div>
-    </div>
-    <div class="container">
-      <div class="block">
-        <span class="demonstration">Year</span>
-        <el-date-picker
-          v-model="value3"
-          type="year"
-          placeholder="Pick a year"
-        />
-      </div>
-     
-    </div>
-    
-    </div>
-    <div id="main" style="width: 1000px;height:400px">
-      预测检验
-    </div>
+    <h1 class="title">
+      {{ selectedYear }}年{{ selectedMonth }}月~{{ Number(selectedYear) + 1 + '' }}年{{ selectedMonth }}月 海冰预测结果检验
+    </h1>
+    <div class="datePickerContainer">
+      <el-date-picker @change="updateChartTitle" v-model="selectedYear" type="year" format="YYYY" value-format="YYYY" :clearable="false" style="width: 80px; height: 25px"/>
+      <div class="text">年</div>
+      <el-date-picker @change="updateChartTitle" v-model="selectedMonth" type="month" format="MM" value-format="MM" :clearable="false" style="width: 60px; height: 25px"/>
+      <div class="text">月</div>
+    </div>    
+    <el-tabs type="border-card">
+      <el-tab-pane label="SIC日预测误差">
+        <div class="chart" id="SICChart"></div>
+        <div class="description">
+          {{ SICChartErroPrediction }}
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="SIC误差统计">
+        <div class="description">
+          {{ SICChartErroAdd }}
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="SIE误差分析">
+        <div class="chart" id="SICChart"></div>
+        <div class="description">
+          {{ SIEChartErroAnalyse }}
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </div>
-
 </template>
 
 <style scoped lang="scss">
-.demo-date-picker {
-  display: flex;
-  width: 100%;
-  padding: 0;
-  flex-wrap: wrap;
-}
+  .title {
+    text-align: center
+  }
+  .chart {
+    height: 500px;
+  }
 
-.demo-date-picker .block {
-  padding: 30px 0;
-  text-align: center;
-  border-right: solid 1px var(--el-border-color);
-  flex: 1;
-}
-.demo-date-picker .block:last-child {
-  border-right: none;
-}
+  .description {
+    font-size: 16px,
+  }
 
-.demo-date-picker .container {
-  flex: 1;
-  border-right: solid 1px var(--el-border-color);
-}
-.demo-date-picker .container .block {
-  border-right: none;
-}
-.demo-date-picker .container .block:last-child {
-  border-top: solid 1px var(--el-border-color);
-}
-.demo-date-picker .container:last-child {
-  border-right: none;
-}
+  .datePickerContainer {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
 
-.demo-date-picker .demonstration {
-  display: block;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-  margin-bottom: 20px;
-}
+  .text {
+    margin-left: 5px;
+    margin-right: 10px;
+  }
 </style>
