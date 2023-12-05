@@ -1,0 +1,17 @@
+// 汇编文件：asm_add.s
+.text
+.global asm_add
+asm_add :
+movl % edi, % eax
+addl% esi, % eax
+ret
+
+// C 部分
+extern int asm_add(int, int);
+int main() {
+	int a = 20, b = 50, c;
+	c = asm_add(a, b);
+	printf("%d + %d = %d\n", a, b, c);
+	return 0;
+}
+
